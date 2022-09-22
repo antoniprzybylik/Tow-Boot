@@ -1,0 +1,47 @@
+From ae73d6c47b3d2fe842b395c0c6f830ccd58280a6 Mon Sep 17 00:00:00 2001
+From: Antoni Przybylik <antoni.przybylik@wp.pl>
+Date: Thu, 22 Sep 2022 19:14:46 +0200
+Subject: [PATCH] Pinephone Pro: Fix I/O voltages (GPIO3D4A is 1.8V)
+
+Fixed camera sensor probe in the kernel. This is based
+on megi's patch --
+https://xff.cz/git/u-boot/commit/?h=ppp&id=0d49568d08accf61e9d6e03d0546854372f7f2d1
+
+Signed-off-by: Antoni Przybylik <antoni.przybylik@wp.pl>
+---
+ .../pine64/pinephone-pro-rk3399/pinephone-pro-rk3399.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/board/pine64/pinephone-pro-rk3399/pinephone-pro-rk3399.c b/board/pine64/pinephone-pro-rk3399/pinephone-pro-rk3399.c
+index 1684fb8ebd..9ffa46d494 100644
+--- a/board/pine64/pinephone-pro-rk3399/pinephone-pro-rk3399.c
++++ b/board/pine64/pinephone-pro-rk3399/pinephone-pro-rk3399.c
+@@ -17,8 +17,9 @@
+ #include <asm/arch-rockchip/misc.h>
+ #include <linux/delay.h>
+ 
+-#define GRF_IO_VSEL_BT565_SHIFT 0
+-#define PMUGRF_CON0_VSEL_SHIFT 8
++#define GRF_IO_VSEL_BT565_GPIO2AB 1
++#define GRF_IO_VSEL_AUDIO_GPIO3D4A 2
++#define PMUGRF_CON0_VSEL_SHIFT 9
+ 
+ #define GPIO3_BASE	0xff788000
+ #define GPIO4_BASE	0xff790000
+@@ -28,11 +29,10 @@ static void setup_iodomain(void)
+ {
+ 	struct rk3399_grf_regs *grf =
+ 	    syscon_get_first_range(ROCKCHIP_SYSCON_GRF);
+-	struct rk3399_pmugrf_regs *pmugrf =
+-	    syscon_get_first_range(ROCKCHIP_SYSCON_PMUGRF);
+ 
+ 	/* BT565 is in 1.8v domain */
+-	rk_setreg(&grf->io_vsel, 1 << GRF_IO_VSEL_BT565_SHIFT);
++	rk_setreg(&grf->io_vsel,
++		  GRF_IO_VSEL_BT565_GPIO2AB | GRF_IO_VSEL_AUDIO_GPIO3D4A);
+ }
+ 
+ int misc_init_r(void)
+-- 
+2.37.3
+
