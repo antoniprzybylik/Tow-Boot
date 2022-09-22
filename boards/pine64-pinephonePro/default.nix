@@ -75,6 +75,7 @@
 
       ./0001-pine64-pinephonepro-device-enablement.patch
       ./0001-rk3399-pinephone-pro-add-smbios-info.patch
+      ./0001-i2c-rockchip-De-initialize-the-bus-after-start-bit-f.patch
     ];
   };
   documentation.sections.installationInstructions = builtins.readFile ./INSTALLING.md;
