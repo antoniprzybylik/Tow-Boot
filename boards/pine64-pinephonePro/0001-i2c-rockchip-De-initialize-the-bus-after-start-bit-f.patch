@@ -1,0 +1,51 @@
+From 3b2f06b51a14f668abb68f6c56ab47c3f4a099d8 Mon Sep 17 00:00:00 2001
+From: Antoni Przybylik <antoni.przybylik@wp.pl>
+Date: Thu, 22 Sep 2022 10:59:22 +0200
+Subject: [PATCH] i2c: rockchip: De-initialize the bus after start bit failure
+
+Failure can happen when i2c is used without initializing pinctrl properly,
+which U-Boot happily allows. Without this fix, further I2C access would
+fail, even after proper pinctrl initialization.
+
+This is based on megi's u-boot (see
+https://xff.cz/git/u-boot/commit/?h=ppp&id=ccb804db1753958a33e7a6e55c52b3b04e4754e9)
+
+Signed-off-by: Antoni Przybylik <antoni.przybylik@wp.pl>
+---
+ drivers/i2c/rk_i2c.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/i2c/rk_i2c.c b/drivers/i2c/rk_i2c.c
+index f8fac45b6c..9927af94a8 100644
+--- a/drivers/i2c/rk_i2c.c
++++ b/drivers/i2c/rk_i2c.c
+@@ -342,7 +342,7 @@ static int rockchip_i2c_xfer(struct udevice *bus, struct i2c_msg *msg,
+ 			     int nmsgs)
+ {
+ 	struct rk_i2c *i2c = dev_get_priv(bus);
+-	int ret;
++	int ret = 0;
+ 
+ 	debug("i2c_xfer: %d messages\n", nmsgs);
+ 	for (; nmsgs > 0; nmsgs--, msg++) {
+@@ -356,14 +356,15 @@ static int rockchip_i2c_xfer(struct udevice *bus, struct i2c_msg *msg,
+ 		}
+ 		if (ret) {
+ 			debug("i2c_write: error sending\n");
+-			return -EREMOTEIO;
++			ret = -EREMOTEIO;
++			break;
+ 		}
+ 	}
+ 
+ 	rk_i2c_send_stop_bit(i2c);
+ 	rk_i2c_disable(i2c);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ int rockchip_i2c_set_bus_speed(struct udevice *bus, unsigned int speed)
+-- 
+2.37.3
+
