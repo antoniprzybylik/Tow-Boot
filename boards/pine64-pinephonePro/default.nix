@@ -78,6 +78,7 @@
       ./0001-rk_gpio-Added-spl_gpio_input-method.patch
       ./0009-Pinephone-Pro-Set-GPIO4_PD3-as-input.patch
       ./0001-i2c-rockchip-De-initialize-the-bus-after-start-bit-f.patch
+      ./0001-Pinephone-Pro-Fix-I-O-voltages-GPIO3D4A-is-1.8V.patch
     ];
   };
   documentation.sections.installationInstructions = builtins.readFile ./INSTALLING.md;
